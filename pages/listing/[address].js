@@ -1,14 +1,20 @@
+import { useRouter } from 'next/router';
+import React from 'react';
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Header from "../../components/Header/Header"
 
-function Item({address}) {
-
+export default function ListingPage() {
+  const router = useRouter();
   const [ ipfs, setIpfs] = useState();
   const [ item, setItem] = useState();
   const [ price, setPrice] = useState();
-  //address
-  //abi
+  const [ sellerCollateral, setSellerCollateral] = useState();
+  const [buyerCollateral, setBuyerCollateral] = useState();
+  const [tipForSeller, setTipForSeller] = useState();
+  const [tipForBuyer, setTipForBuyer] = useState();
+  
+  
   const abi = [
     {
       "inputs": [
@@ -424,39 +430,99 @@ function Item({address}) {
       "type": "function"
     }
   ];
-  //provider
-  
-  //contract
   useEffect(() => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const contract = new ethers.Contract(address, abi, provider)
-    if(!provider) return
-    async function getData() {
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const contract = new ethers.Contract(router.query.address, abi, provider)
+      if(!provider) return
+      async function getData() {
       const Ipfs = await contract.getIpfsImage();
       const Item = await contract.getItem();
       const Price = await contract.getPrice();
+      const SellerCollateral = await contract.getSellerCollateral();
+      const BuyerCollateral = await contract.getBuyerCollateral();
+      const TipForSeller = await contract.getTipForSeller();
+      const TipForBuyer = await contract.getTipForBuyer();
+
       setIpfs(Ipfs);
       setItem(Item);
       setPrice(Price);
+      setSellerCollateral(SellerCollateral);
+      setBuyerCollateral(BuyerCollateral);
+      setTipForSeller(TipForSeller);
+      setTipForBuyer(TipForBuyer);
     }
     getData();
-  }, [address])
-    if(!price || !item || !ipfs) return
-    return (
-      <Link href={`/listing/${address}`}>
-      <div className="flex flex-col card hover:scale-105 transition-all duration-150 ease-out">
-      <div className="flex justify-center">
-      <img className="h-10 w-10" height={100} widht={100} src={ipfs} alt="papareact icon" />
-      </div>
-      <h3>{item}</h3>
-      <p>{`${price} wei`}</p>
-      {`${address.slice(0,5)}...${address.slice(-4)}`}
-    </div>
-      </Link>
-      
+    } catch(e) {
+      console.log(e.message);
+    }
     
-   
+  }, [router.query.address]);
+
+  const purchase = async () => {
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(router.query.address, abi, signer)
+      await contract.purchase("Honolulu", { value: `${price * 2}`});
+    } catch(e) {
+      console.log(e.message)
+    }
+  }
+  if(!price || !item || !ipfs || !sellerCollateral || !buyerCollateral || !tipForSeller || !tipForBuyer) {
+    return(
+      <>
+      <Header />
+      <p
+        className="text-center animate-pulse text-blue-500"
+        >Loading Listing</p>
+      </>
+    )
+  }
+  return (
+    <div>
+      <Header />
+      <div className="max-w-6xl mx-auto px-10 text-xs md:text-lg">
+      <p>{`Contract Address: ${router.query.address}`}</p>
+      </div>
+      
+      <main className="max-w-6xl mx-auto w-full p-2 flex flex-col md:flex-row space-y-10 space-x-5 pr-10">
+        <div className="p-10 border mx-auto lg:mx-0 max-w-md lg:max-w-xl">
+          <img src={ipfs} height={300} width={300} alt="item image"></img>
+        </div>
+        <section className='w-full'>
+          <div className='flex pr-10 flex-col lg:flex-row lg:justify-between'>
+            <div className="mb-2">
+              <h1 className="font-bold text-lg">{item}</h1>
+              {buyerCollateral != 0 ? ("") : (
+                <p>{`Price: ${price} wei`}</p>
+              )}
+              <p>{`Seller Collateral: ${sellerCollateral} wei`}</p>
+              <p>{`Buyer Collateral: ${buyerCollateral} wei`}</p>
+              {buyerCollateral === 0 ? (
+                 <button className="border-2 mt-2 mb-2 border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Seller Cancel/Refunds</button>
+              ) : ("")}
+             
+            </div>
+            <div className="space-y-2">
+            <div className="flex justify-between items-center space-x-2">
+            <p>{`Tip for Seller: ${tipForSeller}`}</p>
+            <button className="border-2 border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Tip the Seller</button>
+            </div>
+            <div className="flex justify-between items-center space-x-2">
+            <p>{`Tip for Buyer: ${tipForSeller}`}</p>
+            <button className="border-2 border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Tip the Buyer</button>
+            </div>
+            </div>
+          </div>
+          {buyerCollateral != 0 ? (
+            <button className="border-2 mt-2  border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Buyer Settles</button>
+          ) : (
+            <button onClick={purchase} className="border-2 mt-2  border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Purchase</button>
+          )}
+          
+        </section>
+      </main>
+    </div>
   )
 }
-
-export default Item
