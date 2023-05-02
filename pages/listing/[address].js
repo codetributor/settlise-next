@@ -509,6 +509,16 @@ export default function ListingPage() {
       console.log(e.message);
     }
   }
+  const refund = async (e) => {
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(router.query.address, abi, signer);
+      await contract.sellerRefund();
+    } catch(e) {
+      console.log(e.message);
+    }
+  }
   if(!price || !item || !ipfs || !sellerCollateral || !buyerCollateral || !tipForSeller || !tipForBuyer) {
     return(
       <>
@@ -531,14 +541,14 @@ export default function ListingPage() {
     )
   }
   return (
-    <div>
+    <div className="mb-10">
       <Header />
       <div className="max-w-6xl mx-auto px-5 text-xs md:text-lg">
       <p>{`Contract Address: ${router.query.address}`}</p>
       </div>
       
-      <main className="max-w-6xl mx-auto w-full p-2 flex flex-col md:flex-row space-y-10 space-x-5 pr-10 md:pr-0">
-        <div className="p-10 border mx-auto lg:mx-0 max-w-md lg:max-w-xl">
+      <main className="max-w-6xl mx-auto justify-center w-full p-2 flex flex-col md:flex-row space-y-10 space-x-5">
+        <div className="p-10 border flex mx-auto justify-center lg:mx-0 max-w-md lg:max-w-xl">
           <img src={ipfs} height={300} width={300} alt="item image"></img>
         </div>
         <section className='w-full'>
@@ -550,12 +560,12 @@ export default function ListingPage() {
               )}
               <p className="text-gray-500">{`Seller Collateral: ${sellerCollateral} wei`}</p>
               <p className="text-gray-500">{`Buyer Collateral: ${buyerCollateral} wei`}</p>
-              {buyerCollateral === 0 ? (
-                 <button className="border-2 mt-2 mb-2 border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Seller Cancel/Refunds</button>
+              {buyerCollateral != 0 ? (
+                 <button onClick={refund} className="border-2 mt-2 mb-2 border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Seller Cancel/Refunds</button>
               ) : ("")}
              
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 pr-5">
             <div className="flex justify-between pr-2 items-center space-x-3">
             <p className="text-gray-500">{`Tip for Seller: ${tipForSeller}`}</p>
             <form className="flex flex-col space-y-1">
@@ -574,9 +584,12 @@ export default function ListingPage() {
             </div>
           </div>
           {buyerCollateral != 0 ? (
-            <button onClick={settle} className="border-2 mt-2  border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Buyer Settles</button>
+            <div className="w-full pr-7">
+                 <button onClick={settle} className="border-2 mt-2 w-full border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Buyer Settles</button>
+            </div>
+           
           ) : (
-            <form className="flex flex-col pr-2">
+            <form className="flex flex-col pr-7">
             <input className="text-gray-500 p-1 my-2 border" value={physicalAddress} onChange={e => setPhysicalAddress(e.target.value)} placeholder="enter physical address" required />
             <button onClick={purchase} type="submit" className="border-2 mt-2  border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Purchase</button>
             </form>
