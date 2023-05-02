@@ -14,6 +14,9 @@ export default function ListingPage() {
   const [tipForSeller, setTipForSeller] = useState();
   const [tipForBuyer, setTipForBuyer] = useState();
   const [physicalAddress, setPhysicalAddress] = useState("");
+  const [finalSettlement, setFinalSettlement] = useState(false);
+  const [tipForSellerInput, setTipForSellerInput] = useState(null);
+  const [tipForBuyerInput, setTipForBuyerInput] = useState(null);
   
   const abi = [
     {
@@ -443,6 +446,7 @@ export default function ListingPage() {
       const BuyerCollateral = await contract.getBuyerCollateral();
       const TipForSeller = await contract.getTipForSeller();
       const TipForBuyer = await contract.getTipForBuyer();
+      const FinalSettlement = await contract.getFinalSettlement();
 
       setIpfs(Ipfs);
       setItem(Item);
@@ -451,6 +455,7 @@ export default function ListingPage() {
       setBuyerCollateral(BuyerCollateral);
       setTipForSeller(TipForSeller);
       setTipForBuyer(TipForBuyer);
+      setFinalSettlement(FinalSettlement);
     }
     getData();
     } catch(e) {
@@ -470,6 +475,40 @@ export default function ListingPage() {
       console.log(e.message)
     }
   }
+  const settle = async (e) => {
+    e.preventDefault();
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(router.query.address, abi, signer);
+      await contract.buyerSettle();
+    } catch(e) {
+      console.log(e.message);
+    }
+  }
+  const addTipForSeller =  async (e) => {
+    e.preventDefault();
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(router.query.address, abi, signer);
+      await contract.tipSeller({value: tipForSellerInput});
+    } catch(e) {
+      console.log(e.message);
+    }
+  }
+
+  const addTipForBuyer = async (e) => {
+    e.preventDefault();
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(router.query.address, abi, signer);
+      await contract.tipBuyer({value: tipForBuyerInput});
+    } catch(e) {
+      console.log(e.message);
+    }
+  }
   if(!price || !item || !ipfs || !sellerCollateral || !buyerCollateral || !tipForSeller || !tipForBuyer) {
     return(
       <>
@@ -478,6 +517,17 @@ export default function ListingPage() {
         className="text-center animate-pulse text-blue-500"
         >Loading Listing</p>
       </>
+    )
+  }
+  if(finalSettlement === true) {
+    return(
+      <div>
+        <Header />
+        <div className="max-w-6xl mx-auto text-xl pt-10">
+          <h1 className="text-xs px-2 text-center md:text-sm lg:text-lg text-gray-500">{router.query.address}: Contract Settled</h1>
+        </div>
+      </div>
+      
     )
   }
   return (
@@ -506,21 +556,28 @@ export default function ListingPage() {
              
             </div>
             <div className="space-y-2">
-            <div className="flex justify-between pr-2 items-center space-x-2">
+            <div className="flex justify-between pr-2 items-center space-x-3">
             <p className="text-gray-500">{`Tip for Seller: ${tipForSeller}`}</p>
-            <button className="border-2 border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Tip the Seller</button>
+            <form className="flex flex-col space-y-1">
+              <input value={tipForSellerInput} onChange={e => setTipForSellerInput(e.target.value)} className="p-1 border" placeholder='enter tip seller' />
+              <button onClick={addTipForSeller} className="border-2 border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Tip the Seller</button>
+            </form>
             </div>
-            <div className="flex justify-between pr-2 items-center space-x-2">
-            <p className="text-gray-500">{`Tip for Buyer: ${tipForSeller}`}</p>
-            <button className="border-2 border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Tip the Buyer</button>
+            <div className="flex justify-between pr-2 items-center space-x-3">
+            <p className="text-gray-500">{`Tip for Buyer: ${tipForBuyer}`}</p>
+            <form className="flex flex-col space-y-1">
+            <input value={tipForBuyerInput} onChange={e => setTipForBuyerInput(e.target.value)} className="p-1 border" placeholder='enter tip buyer' />
+            <button onClick={addTipForBuyer} type="submit" className="border-2 border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Tip the Buyer</button>
+            </form>
+            
             </div>
             </div>
           </div>
           {buyerCollateral != 0 ? (
-            <button className="border-2 mt-2  border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Buyer Settles</button>
+            <button onClick={settle} className="border-2 mt-2  border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Buyer Settles</button>
           ) : (
             <form className="flex flex-col pr-2">
-            <input className="text-gray-500" value={physicalAddress} onChange={e => setPhysicalAddress(e.target.value)} placeholder="enter physical address" required />
+            <input className="text-gray-500 p-1 my-2 border" value={physicalAddress} onChange={e => setPhysicalAddress(e.target.value)} placeholder="enter physical address" required />
             <button onClick={purchase} type="submit" className="border-2 mt-2  border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Purchase</button>
             </form>
            

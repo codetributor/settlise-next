@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAddress, useDisconnect, useMetamask } from '@thirdweb-dev/react';
 import Link from 'next/link';
+
 import {
     BellIcon,
     ShoppingCartIcon,
@@ -11,7 +12,12 @@ import Image from 'next/image';
 
 function Header() {
 
-    const connectWithMetamask = useMetamask();
+    let connectWithMetamask
+    try {
+        connectWithMetamask = useMetamask();
+    } catch(e) {
+        console.log(e.message)
+    }
     const disconnect = useDisconnect();
     const address = useAddress();
 
@@ -20,7 +26,7 @@ function Header() {
         <nav className="flex justify-between">
             <div className="flex items-center space-x-2 text-sm">
                 {address? (<button onClick={disconnect} className="connectWalletBtn">{address.slice(0, 5) + '...' + address.slice(-4)}</button>) :
-                (<button className="connectWalletBtn" onClick={() => connectWithMetamask()}>Connect your wallet</button>)}
+                (<button className="connectWalletBtn" onClick={() => connectWithMetamask({chainID: "mumbai"})}>Connect your wallet</button>)}
                 <p className="headerLink">Daily Deals</p>
                 <p className="headerLink">Help & Contact</p>
             </div>
