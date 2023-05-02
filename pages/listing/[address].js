@@ -13,7 +13,7 @@ export default function ListingPage() {
   const [buyerCollateral, setBuyerCollateral] = useState();
   const [tipForSeller, setTipForSeller] = useState();
   const [tipForBuyer, setTipForBuyer] = useState();
-  
+  const [physicalAddress, setPhysicalAddress] = useState("");
   
   const abi = [
     {
@@ -459,12 +459,13 @@ export default function ListingPage() {
     
   }, [router.query.address]);
 
-  const purchase = async () => {
+  const purchase = async (e) => {
+    e.preventDefault();
     try {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(router.query.address, abi, signer)
-      await contract.purchase("Honolulu", { value: `${price * 2}`});
+      await contract.purchase(physicalAddress, { value: `${price * 2}`});
     } catch(e) {
       console.log(e.message)
     }
@@ -482,35 +483,35 @@ export default function ListingPage() {
   return (
     <div>
       <Header />
-      <div className="max-w-6xl mx-auto px-10 text-xs md:text-lg">
+      <div className="max-w-6xl mx-auto px-5 text-xs md:text-lg">
       <p>{`Contract Address: ${router.query.address}`}</p>
       </div>
       
-      <main className="max-w-6xl mx-auto w-full p-2 flex flex-col md:flex-row space-y-10 space-x-5 pr-10">
+      <main className="max-w-6xl mx-auto w-full p-2 flex flex-col md:flex-row space-y-10 space-x-5 pr-10 md:pr-0">
         <div className="p-10 border mx-auto lg:mx-0 max-w-md lg:max-w-xl">
           <img src={ipfs} height={300} width={300} alt="item image"></img>
         </div>
         <section className='w-full'>
-          <div className='flex pr-10 flex-col lg:flex-row lg:justify-between'>
+          <div className='flex flex-col lg:flex-row lg:justify-between'>
             <div className="mb-2">
               <h1 className="font-bold text-lg">{item}</h1>
               {buyerCollateral != 0 ? ("") : (
-                <p>{`Price: ${price} wei`}</p>
+                <p className="text-gray-500">{`Price: ${price} wei`}</p>
               )}
-              <p>{`Seller Collateral: ${sellerCollateral} wei`}</p>
-              <p>{`Buyer Collateral: ${buyerCollateral} wei`}</p>
+              <p className="text-gray-500">{`Seller Collateral: ${sellerCollateral} wei`}</p>
+              <p className="text-gray-500">{`Buyer Collateral: ${buyerCollateral} wei`}</p>
               {buyerCollateral === 0 ? (
                  <button className="border-2 mt-2 mb-2 border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Seller Cancel/Refunds</button>
               ) : ("")}
              
             </div>
             <div className="space-y-2">
-            <div className="flex justify-between items-center space-x-2">
-            <p>{`Tip for Seller: ${tipForSeller}`}</p>
+            <div className="flex justify-between pr-2 items-center space-x-2">
+            <p className="text-gray-500">{`Tip for Seller: ${tipForSeller}`}</p>
             <button className="border-2 border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Tip the Seller</button>
             </div>
-            <div className="flex justify-between items-center space-x-2">
-            <p>{`Tip for Buyer: ${tipForSeller}`}</p>
+            <div className="flex justify-between pr-2 items-center space-x-2">
+            <p className="text-gray-500">{`Tip for Buyer: ${tipForSeller}`}</p>
             <button className="border-2 border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Tip the Buyer</button>
             </div>
             </div>
@@ -518,7 +519,11 @@ export default function ListingPage() {
           {buyerCollateral != 0 ? (
             <button className="border-2 mt-2  border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Buyer Settles</button>
           ) : (
-            <button onClick={purchase} className="border-2 mt-2  border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Purchase</button>
+            <form className="flex flex-col pr-2">
+            <input className="text-gray-500" value={physicalAddress} onChange={e => setPhysicalAddress(e.target.value)} placeholder="enter physical address" required />
+            <button onClick={purchase} type="submit" className="border-2 mt-2  border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Purchase</button>
+            </form>
+           
           )}
           
         </section>
