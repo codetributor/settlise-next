@@ -2,11 +2,13 @@ import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-function Item({address}) {
+function Item({address, type, isAccount, userAddress}) {
 
-  const [ ipfs, setIpfs] = useState();
-  const [ item, setItem] = useState();
-  const [ price, setPrice] = useState();
+  const [ ipfs, setIpfs] = useState("");
+  const [ item, setItem] = useState("");
+  const [ price, setPrice] = useState("");
+  const [ seller, setSeller ] = useState("");
+  const [ buyer, setBuyer ] = useState("");
   //address
   //abi
   const abi = [
@@ -435,28 +437,63 @@ function Item({address}) {
       const Ipfs = await contract.getIpfsImage();
       const Item = await contract.getItem();
       const Price = await contract.getPrice();
+      const Seller = await contract.getSellerAddress();
+      const Buyer = await contract.getBuyerAddress();
       setIpfs(Ipfs);
       setItem(Item);
       setPrice(Price);
+      setSeller(Seller)
+      setBuyer(Buyer)
     }
     getData();
   }, [address])
-    if(!price || !item || !ipfs) return
-    return (
-      <Link href={`/listing/${address}`}>
-      <div className="flex flex-col card hover:scale-105 transition-all duration-150 ease-out">
-      <div className="flex justify-center">
-      <img className="h-10 w-10" height={100} widht={100} src={ipfs} alt="papareact icon" />
+    if(!price || !item || !ipfs || !seller) return
+    if(isAccount) {
+      if(type == "seller") {
+        if(userAddress === seller) {
+          return( <Link href={`/listing/${address}`}>
+          <div className="flex flex-col card hover:scale-105 transition-all duration-150 ease-out">
+          <div className="flex justify-center">
+          <img className="h-10 w-10" height={100} widht={100} src={ipfs} alt="papareact icon" />
+          </div>
+          <h3>{item}</h3>
+          <p>{`${price} wei`}</p>
+          {`${address.slice(0,5)}...${address.slice(-4)}`}
+        </div>
+          </Link>);
+        } else {
+          return;
+        }
+      } else {
+        if(userAddress === buyer) {
+          return( <Link href={`/listing/${address}`}>
+          <div className="flex flex-col card hover:scale-105 transition-all duration-150 ease-out">
+          <div className="flex justify-center">
+          <img className="h-10 w-10" height={100} widht={100} src={ipfs} alt="papareact icon" />
+          </div>
+          <h3>{item}</h3>
+          <p>{`${price} wei`}</p>
+          {`${address.slice(0,5)}...${address.slice(-4)}`}
+        </div>
+          </Link>);
+        } else {
+          return;
+        }
+      }
+    } else {
+      return (
+        <Link href={`/listing/${address}`}>
+        <div className="flex flex-col card hover:scale-105 transition-all duration-150 ease-out">
+        <div className="flex justify-center">
+        <img className="h-10 w-10" height={100} widht={100} src={ipfs} alt="papareact icon" />
+        </div>
+        <h3>{item}</h3>
+        <p>{`${price} wei`}</p>
+        {`${address.slice(0,5)}...${address.slice(-4)}`}
       </div>
-      <h3>{item}</h3>
-      <p>{`${price} wei`}</p>
-      {`${address.slice(0,5)}...${address.slice(-4)}`}
-    </div>
-      </Link>
-      
-    
-   
-  )
+        </Link>
+    )
+    }
 }
 
 export default Item

@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 import {
     BellIcon,
-    ShoppingCartIcon,
+    UserCircleIcon,
     ChevronDownIcon,
     MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
@@ -12,14 +12,16 @@ import Image from 'next/image';
 
 function Header() {
 
-    let connectWithMetamask
+    let connectWithMetamask;
+    let address;
     try {
         connectWithMetamask = useMetamask();
+        address = useAddress();
     } catch(e) {
         console.log(e.message)
     }
     const disconnect = useDisconnect();
-    const address = useAddress();
+   
 
   return (
     <div className="max-w-6xl mx-auto p-2">
@@ -39,7 +41,9 @@ function Header() {
                     <ChevronDownIcon className="h-4"/>    
                 </Link>
                 <BellIcon className="h-6 w-6" />
-                <ShoppingCartIcon className="h-6 w-6" />
+                <Link href={`/users/${address}`}>
+                <UserCircleIcon className="h-6 w-6" />
+                </Link>
             </div>
         </nav>
         <hr className="mt-2" />

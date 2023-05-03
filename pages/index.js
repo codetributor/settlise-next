@@ -15,7 +15,7 @@ export default function Home() {
         className="text-center animate-pulse text-blue-500"
         >Loading Listing</p>
       ) : (
-        <ItemList contractAddresses={contractAddresses} />
+        <ItemList contractAddresses={contractAddresses} isAccount={false}/>
       )}
       
     </main>
