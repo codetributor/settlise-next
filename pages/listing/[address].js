@@ -2,7 +2,8 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
-import Header from "../../components/Header/Header"
+import Header from "../../components/Header/Header";
+import { useAddress, useDisconnect, useMetamask } from '@thirdweb-dev/react';
 
 export default function ListingPage() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export default function ListingPage() {
   const [buyerAddress, setBuyerAddress] = useState();
   const [sellerPhysicalAddress, setSellerPhysicalAddress] = useState();
   const [buyerPhysicalAddress, setBuyerPhysicalAddress] = useState();
-  
+  console.log(router.query)
   const abi = [
     {
       "inputs": [
@@ -476,16 +477,26 @@ export default function ListingPage() {
     
   }, [router.query.address]);
 
+  const connectWithMetamask = useMetamask();
+  const address = useAddress();
+  const disconnect = useDisconnect();
+
   const purchase = async (e) => {
     e.preventDefault();
+    if (!physicalAddress) {
+      alert("Please enter physical address")
+      return
+    } 
     try {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(router.query.address, abi, signer)
-      await contract.purchase(physicalAddress, { value: `${price * 2}`});
+      const tx = await contract.purchase(physicalAddress, { value: `${price * 2}`});
+      await tx.wait(1);
     } catch(e) {
       console.log(e.message)
     }
+    router.push(`/users/${address}`);
   }
   const settle = async (e) => {
     e.preventDefault();
@@ -493,10 +504,12 @@ export default function ListingPage() {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = await provider.getSigner()
       const contract = new ethers.Contract(router.query.address, abi, signer);
-      await contract.buyerSettle();
+      const tx = await contract.buyerSettle();
+      await tx.wait(1)
     } catch(e) {
       console.log(e.message);
     }
+    router.push(`/users/${address}`);
   }
   const addTipForSeller =  async (e) => {
     e.preventDefault();
