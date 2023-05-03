@@ -14,13 +14,15 @@ function Header() {
 
     let connectWithMetamask;
     let address;
+    let disconnect;
     try {
         connectWithMetamask = useMetamask();
         address = useAddress();
+        disconnect = useDisconnect();
     } catch(e) {
         console.log(e.message)
     }
-    const disconnect = useDisconnect();
+    
    
 
   return (

@@ -17,6 +17,10 @@ export default function ListingPage() {
   const [finalSettlement, setFinalSettlement] = useState(false);
   const [tipForSellerInput, setTipForSellerInput] = useState(null);
   const [tipForBuyerInput, setTipForBuyerInput] = useState(null);
+  const [sellerAddress, setSellerAddress] = useState();
+  const [buyerAddress, setBuyerAddress] = useState();
+  const [sellerPhysicalAddress, setSellerPhysicalAddress] = useState();
+  const [buyerPhysicalAddress, setBuyerPhysicalAddress] = useState();
   
   const abi = [
     {
@@ -447,6 +451,10 @@ export default function ListingPage() {
       const TipForSeller = await contract.getTipForSeller();
       const TipForBuyer = await contract.getTipForBuyer();
       const FinalSettlement = await contract.getFinalSettlement();
+      const SellerAddress = await contract.getSellerAddress();
+      const BuyerAddress = await contract.getBuyerAddress();
+      const SellerPhysicalAddress = await contract.getSellerPhysicalAddress();
+      const BuyerPhysicalAddress = await contract.getBuyerPhysicalAddress();
 
       setIpfs(Ipfs);
       setItem(Item);
@@ -456,6 +464,10 @@ export default function ListingPage() {
       setTipForSeller(TipForSeller);
       setTipForBuyer(TipForBuyer);
       setFinalSettlement(FinalSettlement);
+      setSellerAddress(SellerAddress);
+      setBuyerAddress(BuyerAddress);
+      setSellerPhysicalAddress(SellerPhysicalAddress);
+      setBuyerPhysicalAddress(BuyerPhysicalAddress);
     }
     getData();
     } catch(e) {
@@ -519,7 +531,7 @@ export default function ListingPage() {
       console.log(e.message);
     }
   }
-  if(!price || !item || !ipfs || !sellerCollateral || !buyerCollateral || !tipForSeller || !tipForBuyer) {
+  if(!price || !item || !ipfs || !sellerCollateral || !buyerCollateral || !tipForSeller || !tipForBuyer || !sellerAddress || !buyerAddress ) {
     return(
       <>
       <Header />
@@ -560,6 +572,10 @@ export default function ListingPage() {
               )}
               <p className="text-gray-500">{`Seller Collateral: ${sellerCollateral} wei`}</p>
               <p className="text-gray-500">{`Buyer Collateral: ${buyerCollateral} wei`}</p>
+              <p className="text-gray-500">{`Seller Address: ${sellerAddress.slice(0,5) + "..." + sellerAddress.slice(-4)}`}</p>
+              <p className="text-gray-500">{`Buyer Address: ${buyerAddress.slice(0,5) + "..." + buyerAddress.slice(-4)}`}</p>
+              <p className="text-gray-500">{`Seller Physical Address: ${sellerPhysicalAddress}`}</p>
+              <p className="text-gray-500">{`Buyer Physical Address: ${buyerPhysicalAddress}`}</p>
               {buyerCollateral != 0 ? (
                  <button onClick={refund} className="border-2 mt-2 mb-2 border-blue-600 px-5 md:px-10 py-2 text-blue-600 hover:bg-blue-600/50 hover:text-white cursor-pointer">Seller Cancel/Refunds</button>
               ) : ("")}
