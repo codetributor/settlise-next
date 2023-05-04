@@ -11,7 +11,7 @@ export default function Home() {
 
   const [ type, setType ] = useState("buyer");
 
-  const { contract } = useContract("0xc622a97E5657f4E14Eb28c9736B0F22DafAa7A2D");
+  const { contract } = useContract("0x84eb9bE781cFD4A2BcE9EBc0B6D53f1983070828");
   const { data: contractAddresses, isLoading } = useContractRead(contract, "getUserAddresses", [router.query.address])
   return (
     <main className="max-w-6xl mx-auto pb-10">

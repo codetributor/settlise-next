@@ -7,22 +7,21 @@ import { useAddress, useDisconnect, useMetamask } from '@thirdweb-dev/react';
 
 export default function ListingPage() {
   const router = useRouter();
-  const [ ipfs, setIpfs] = useState();
-  const [ item, setItem] = useState();
-  const [ price, setPrice] = useState();
-  const [ sellerCollateral, setSellerCollateral] = useState();
-  const [buyerCollateral, setBuyerCollateral] = useState();
-  const [tipForSeller, setTipForSeller] = useState();
-  const [tipForBuyer, setTipForBuyer] = useState();
+  const [ ipfs, setIpfs] = useState("");
+  const [ item, setItem] = useState("");
+  const [ price, setPrice] = useState("");
+  const [ sellerCollateral, setSellerCollateral] = useState("");
+  const [buyerCollateral, setBuyerCollateral] = useState("");
+  const [tipForSeller, setTipForSeller] = useState("");
+  const [tipForBuyer, setTipForBuyer] = useState("");
   const [physicalAddress, setPhysicalAddress] = useState("");
   const [finalSettlement, setFinalSettlement] = useState(false);
-  const [tipForSellerInput, setTipForSellerInput] = useState(null);
-  const [tipForBuyerInput, setTipForBuyerInput] = useState(null);
-  const [sellerAddress, setSellerAddress] = useState();
-  const [buyerAddress, setBuyerAddress] = useState();
-  const [sellerPhysicalAddress, setSellerPhysicalAddress] = useState();
-  const [buyerPhysicalAddress, setBuyerPhysicalAddress] = useState();
-  console.log(router.query)
+  const [tipForSellerInput, setTipForSellerInput] = useState("");
+  const [tipForBuyerInput, setTipForBuyerInput] = useState("");
+  const [sellerAddress, setSellerAddress] = useState("");
+  const [buyerAddress, setBuyerAddress] = useState("");
+  const [sellerPhysicalAddress, setSellerPhysicalAddress] = useState("");
+  const [buyerPhysicalAddress, setBuyerPhysicalAddress] = useState("");
   const abi = [
     {
       "inputs": [
